@@ -61,6 +61,10 @@ env.Append(CPPPATH=[
 	'thirdparty/godot_cpp/include/gen'
 ]);
 
+if platform == 'osx':
+	env.Append(CCFLAGS = ['-g','-O3', '-arch', 'x86_64'])
+	env.Append(LINKFLAGS = ['-arch', 'x86_64'])
+
 # Source lists
 sources = [
 	'src/gdsqlite.cpp',

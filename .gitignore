@@ -46,7 +46,9 @@ Thumbs.db
 bin/
 demo/.import/
 demo/lib/gdsqlite/*.lib
+demo/lib/gdsqlite/*.dylib
 lib/*.lib
+lib/*.dylib
 
 # VS
 vsproj/.vs/
