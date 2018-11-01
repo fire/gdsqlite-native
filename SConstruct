@@ -94,4 +94,4 @@ env.Append(LIBPATH=['thirdparty/godot_cpp/bin/']);
 env.Append(LIBS=[godotcpp_lib]);
 
 library = env.SharedLibrary(target=('bin/' + output), source=sources);
-Install('demo/lib/gdsqlite', source=library);
+Install('demo/addons/gdsqlite', source=library);
