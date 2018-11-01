@@ -1,4 +1,4 @@
 [submodule "thirdparty/godot_cpp"]
 	path = thirdparty/godot_cpp
-	url = https://github.com/GodotNativeTools/godot-cpp
-	branch = nativescript-1.1
+	url = https://github.com/fire/godot-cpp.git
+	branch = master
