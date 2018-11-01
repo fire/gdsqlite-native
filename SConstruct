@@ -72,7 +72,6 @@ if platform == 'windows':
             env['LINKFLAGS']= ['--static', '-Wl,--subsystem,windows', '-Wl,--no-undefined', '-static-libgcc', '-static-libstdc++']
 
 output += '.' + platform
-
 if bits == '64':
 	output += '.64';
 else:
