@@ -69,7 +69,7 @@ if platform == 'windows':
 		env.Append(CCFLAGS = ['-D_WIN32', '-EHsc', '/DEBUG', '-D_DEBUG', '/MDd'])
 	else:
 		env.Append(CCFLAGS = ['-D_WIN32', '/EHsc', '/O2', '/MD' ])
-
+output += '.' + platform
 if bits == '64':
 	output += '.64';
 else:
