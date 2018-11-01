@@ -40,13 +40,6 @@ if platform == 'windows':
 		env = Environment(ENV = os.environ, TARGET_ARCH='x86');
 		godotcpp_lib += '.windows.32';
 	
-	if target == 'debug':
-		env['CCPDBFLAGS'] = '/Zi /Fd${TARGET}.pdb'
-		env['PDB']='${TARGET.base}.pdb'
-		env.Append(CCFLAGS = ['-D_WIN32', '-EHsc', '/DEBUG', '-D_DEBUG', '/MDd'])
-	else:
-		env.Append(CCFLAGS = ['-D_WIN32', '/EHsc', '/O2', '/MD' ])
-
 	if use_mingw == True:
 		env = env.Clone(tools = ['mingw'])
 		env['ENV'] = {'PATH' : os.environ['PATH'], 'TMP' : os.environ['TMP']}
@@ -61,6 +54,13 @@ if platform == 'windows':
 			env['CXX'] = 'i686-w64-mingw32-g++'
 		env['CCFLAGS'] = ['-g', '-O3', '-std=c++14', '-Wwrite-strings']
 		env['LINKFLAGS']= ['--static', '-Wl,--no-undefined', '-static-libgcc', '-static-libstdc++']
+	else:
+		if target == 'debug':
+			env['CCPDBFLAGS'] = '/Zi /Fd${TARGET}.pdb'
+			env['PDB']='${TARGET.base}.pdb'
+			env.Append(CCFLAGS = ['-D_WIN32', '-EHsc', '/DEBUG', '-D_DEBUG', '/MDd'])
+		else:
+			env.Append(CCFLAGS = ['-D_WIN32', '/EHsc', '/O2', '/MD' ])
 
 if bits == '64':
 	output += '.64';
