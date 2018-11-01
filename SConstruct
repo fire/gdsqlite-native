@@ -10,7 +10,7 @@ bits = ARGUMENTS.get('b', ARGUMENTS.get('bits', '64'));
 target = ARGUMENTS.get('t', ARGUMENTS.get('target', 'release'));
 use_mingw = ARGUMENTS.get('use_mingw', False);
 output = 'gdsqlite';
-godotcpp_lib = 'godot_cpp';
+godotcpp_lib = 'libgodot-cpp';
 
 if platform == 'linux':
 	if ARGUMENTS.get('use_llvm', 'no') == 'yes':
@@ -23,44 +23,52 @@ if platform == 'linux':
 	else:
 		env.Append(CCFLAGS = ['-O3']);
 	
+	if use_mingw:
+		env = env.Clone(tools = ['mingw'])
+#		env['ENV'] = {'PATH' : os.environ['PATH'], 'TMP' : os.environ['TMP']}
+		# Workaround for MinGW. See:
+		# http://www.scons.org/wiki/LongCmdLinesOnWin32
+#		use_windows_spawn_fix(env)
+
+		mingw_prefix = ''
+		# MinGW
+		if bits == '64':
+			mingw_prefix = 'x86_64-w64-mingw32-'
+		elif bits == '32':
+			mingw_prefix = 'i686-w64-mingw32-'
+			env["CC"] = mingw_prefix + 'gcc'
+			env['AS'] = mingw_prefix + 'as'
+			env['CXX'] = mingw_prefix + 'g++'
+			env['AR'] = mingw_prefix + 'gcc-ar'
+			env['RANLIB'] = mingw_prefix + 'gcc-ranlib'
+			env['LINK'] = mingw_prefix + 'g++'
+
+		env['CCFLAGS'] = ['-g', '-O3', '-std=c++14', '-DSQLITE_OS_WIN=1', '-Wwrite-strings']
+		env['LINKFLAGS']= ['--static', '-Wl,--subsystem,windows', '-Wl,--no-undefined', '-static-libgcc', '-static-libstdc++']
+
 	if bits == '64':
 		env.Append(CCFLAGS = [ '-m64' ]);
 		env.Append(LINKFLAGS = [ '-m64' ]);
-		godotcpp_lib += '.linux.64';
+		godotcpp_lib += '.linux.' + target + '.' + bits;
 	else:
 		env.Append(CCFLAGS = [ '-m32' ]);
 		env.Append(LINKFLAGS = [ '-m32' ]);
-		godotcpp_lib += '.linux.32';
+		godotcpp_lib += '.linux.' + target + '.' + bits;
 
 if platform == 'windows':
 	if bits == '64':
 		env = Environment(ENV = os.environ, TARGET_ARCH='amd64');
-		godotcpp_lib += '.windows.64';
+		godotcpp_lib += '.windows.' + target + '.' + bits;
 	else:
 		env = Environment(ENV = os.environ, TARGET_ARCH='x86');
-		godotcpp_lib += '.windows.32';
+		godotcpp_lib += '.windows.' + target + '.' + bits;
 	
-	if use_mingw == True:
-		env = env.Clone(tools = ['mingw'])
-		env['ENV'] = {'PATH' : os.environ['PATH'], 'TMP' : os.environ['TMP']}
-		# Workaround for MinGW. See:
-		# http://www.scons.org/wiki/LongCmdLinesOnWin32
-		use_windows_spawn_fix(env)
-
-		# MinGW
-		if env['bits'] == '64':
-			env['CXX'] = 'x86_64-w64-mingw32-g++'
-		elif env['bits'] == '32':
-			env['CXX'] = 'i686-w64-mingw32-g++'
-		env['CCFLAGS'] = ['-g', '-O3', '-std=c++14', '-Wwrite-strings']
-		env['LINKFLAGS']= ['--static', '-Wl,--no-undefined', '-static-libgcc', '-static-libstdc++']
+	if target == 'debug':
+		env['CCPDBFLAGS'] = '/Zi /Fd${TARGET}.pdb'
+		env['PDB']='${TARGET.base}.pdb'
+		env.Append(CCFLAGS = ['-D_WIN32', '-EHsc', '/DEBUG', '-D_DEBUG', '/MDd'])
 	else:
-		if target == 'debug':
-			env['CCPDBFLAGS'] = '/Zi /Fd${TARGET}.pdb'
-			env['PDB']='${TARGET.base}.pdb'
-			env.Append(CCFLAGS = ['-D_WIN32', '-EHsc', '/DEBUG', '-D_DEBUG', '/MDd'])
-		else:
-			env.Append(CCFLAGS = ['-D_WIN32', '/EHsc', '/O2', '/MD' ])
+		env.Append(CCFLAGS = ['-D_WIN32', '/EHsc', '/O2', '/MD' ])
 
 if bits == '64':
 	output += '.64';
@@ -87,11 +95,10 @@ sources = [
 	'src/library.cpp',
 	'thirdparty/sqlite/sqlite3.c',
 	'thirdparty/sqlite/spmemvfs.c'
-];
+]
 
 # Libraries
-env.Append(LIBPATH=['thirdparty/godot_cpp/bin/']);
+env.Append(LIBPATH=['thirdparty/godot_cpp/bin/'])
 env.Append(LIBS=[godotcpp_lib]);
-
-library = env.SharedLibrary(target=('bin/' + output), source=sources);
-Install('demo/addons/gdsqlite', source=library);
+library = env.SharedLibrary(target='bin/' + output, source=sources)
+Install('demo/addons/gdsqlite', source=library)
