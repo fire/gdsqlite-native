@@ -95,11 +95,32 @@ if platform == 'windows':
 
                 env['CCFLAGS'] = ['-g', '-O3', '-std=c++14', '-DSQLITE_OS_WIN=1', '-Wwrite-strings']
                 env['LINKFLAGS']= ['--static', '-Wl,--subsystem,windows', '-Wl,--no-undefined', '-static-libgcc', '-static-libstdc++']
+    
+	if use_mingw:
+            env = env.Clone(tools = ['mingw'])
+#           env['ENV'] = {'PATH' : os.environ['PATH'], 'TMP' : os.environ['TMP']}
+            # Workaround for MinGW. See:
+            # http://www.scons.org/wiki/LongCmdLinesOnWin32
+#               use_windows_spawn_fix(env)
 
+            mingw_prefix = ''
+            # MinGW
+            if bits == '64':
+                    mingw_prefix = 'x86_64-w64-mingw32-'
+            elif bits == '32':
+                    mingw_prefix = 'i686-w64-mingw32-'
 
+            env["CC"] = mingw_prefix + 'gcc'
+            env['AS'] = mingw_prefix + 'as'
+            env['CXX'] = mingw_prefix + 'g++'
+            env['AR'] = mingw_prefix + 'gcc-ar'
+            env['RANLIB'] = mingw_prefix + 'gcc-ranlib'
+            env['LINK'] = mingw_prefix + 'g++'
+
+            env['CCFLAGS'] = ['-g', '-O3', '-std=c++14', '-DSQLITE_OS_WIN=1', '-Wwrite-strings']
+            env['LINKFLAGS']= ['--static', '-Wl,--subsystem,windows', '-Wl,--no-undefined', '-static-libgcc', '-static-libstdc++']
 
 output += '.' + platform
-
 if bits == '64':
 	output += '.64';
 else:
