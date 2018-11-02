@@ -1,7 +1,7 @@
 extends Node
 
 # SQLite module
-const SQLite = preload("res://lib/gdsqlite.gdns");
+const SQLite = preload("res://addons/gdsqlite/gdsqlite.gdns");
 
 # Variables
 var db;
